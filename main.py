@@ -1,3 +1,4 @@
+import re
 from threading import Thread
 import xml.sax
 import process_text as pt
@@ -47,9 +48,12 @@ class WikiHandler(xml.sax.ContentHandler):
 		if tag=="text":
 			self.body = self.cur_content
 
+		# add different fields to the queue
 		if tag=="page":
+			#self.category = re.findall("^\[\[Category\:.*\]\]$",self.body)
+			#self.info_box = re.findall("^{{Infobox.*}}$",self.body)
 			arg = [self.title,self.body,self.info_box,self.category,self.external_links,self.references] 
-			q.put(arg)
+			pt.tokenize(arg)
 			#print(q.get())
 			#pt.tokenize(self.cur_doc)
 			print(self.count)
@@ -74,8 +78,8 @@ Handler = WikiHandler()
 parser.setContentHandler(Handler)
 
 parser.parse("data.xml")
-
-
+'''
+# assign tasks
 def call_process_text(qu,):
 		while not qu.empty():
 			#print("qqqqqqqq")
@@ -91,3 +95,4 @@ for i in range(num_threads):
 	thread.setDaemon(True)
 	thread.start()
 q.join()
+'''

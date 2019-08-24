@@ -11,10 +11,24 @@ stopwords = set(stopwords.words('english'))
 def tokenize(article):
 	words = []
 	for field in article:
+		#print(field)
 		words.append(re.findall("[\w']+",field))
-	case_folding(words)
-	#print(words)
+	
+	category = re.findall("\[\[Category\:.*\]\]",article[1])
+	for c in category:
+		sep_words = re.findall("[\w']+",c)
+		for w in sep_words:
+			words[3].append(w)		
 
+	info_box = re.findall("^{{Infobox.*}}$",article[1])
+	for i in info_box:
+		sep_words = re.findall("[\w']+",c)
+		for w in sep_words:
+			words[2].append(w)		
+
+
+	case_folding(words)
+	
 def case_folding(old_words):
 	new_words = []
 	for field in old_words:
@@ -40,5 +54,5 @@ def count(words):
 				count[w][i] += 1
 		
 
-	[ print(key , " :: " , value) for (key, value) in sorted(count.items()) if count[key][0]>0 ]
-	print("\n")
+#	[ print(key , " :: " , value) for (key, value) in sorted(count.items())] #if count[key][3]>0 ]
+#	print("\n")
