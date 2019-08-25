@@ -3,7 +3,10 @@ from threading import Thread
 import xml.sax
 import process_text as pt
 import merge
-		
+import sys
+
+dump_path = sys.argv[1]
+index_path = sys.argv[2]
 
 
 class WikiHandler(xml.sax.ContentHandler):
@@ -51,7 +54,7 @@ class WikiHandler(xml.sax.ContentHandler):
 			#self.category = re.findall("^\[\[Category\:.*\]\]$",self.body)
 			#self.info_box = re.findall("^{{Infobox.*}}$",self.body)
 			arg = [self.title,self.body,self.info_box,self.category,self.external_links,self.references] 
-			pt.tokenize(self.count,arg)
+			pt.tokenize(self.count,arg,index_path)
 			#print(q.get())
 			#pt.tokenize(self.cur_doc)
 			#print(self.count)
@@ -75,6 +78,6 @@ parser.setFeature(xml.sax.handler.feature_namespaces, 0)
 Handler = WikiHandler()
 parser.setContentHandler(Handler)
 
-parser.parse("data.xml")
+parser.parse(dump_path)
 
-merge.main_merge()
+merge.main_merge(index_path)

@@ -9,7 +9,7 @@ stopwords = set(stopwords.words('english'))
 
 
 # create an array of separate words for all fields
-def tokenize(docID,article):
+def tokenize(docID,article,index_path):
 	words = []
 	for field in article:
 		#print(field)
@@ -29,23 +29,23 @@ def tokenize(docID,article):
 		for w in sep_words:
 			words[2].append(w)		
 
-	case_folding(docID,words)
+	case_folding(docID,words,index_path)
 	
-def case_folding(docID,old_words):
+def case_folding(docID,old_words,index_path):
 	new_words = []
 	for field in old_words:
 		new_words.append([s.lower() for s in field])
-	stem(docID,new_words)
+	stem(docID,new_words,index_path)
 
 # to remove stop words and stem words
-def stem(docID,all_words):
+def stem(docID,all_words,index_path):
 	words = []
 	for field in all_words:
 		words.append([porter.stem(w) for w in field if not w in stopwords])
-	count(docID,words)
+	count(docID,words,index_path)
 
 # counting every single word count in all fields
-def count(docID,words):
+def count(docID,words,index_path):
 	count = {}
 	
 	# order of fields : title, body, info_box, category, external_links, referances
@@ -57,13 +57,13 @@ def count(docID,words):
 			else:
 				count[w][i] += 1
 	
-	to_file(docID,count)
+	to_file(docID,count,index_path)
 
 
 # write to file "docID.txt"
 # format for a word (say key): key:docID,tTNUM,bBODY,iINFO,cCATEGORY,lLINKS,rREFERENCES
-def to_file(docID,count):
-	file_name = "files/1_" + str(docID) + ".txt"
+def to_file(docID,count,index_path):
+	file_name = index_path + "/1_" + str(docID) + ".txt"
 	f = open(file_name,"w")
 	for w in sorted(count.keys()):
 		to_write = w + ":" + str(docID)

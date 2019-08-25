@@ -2,10 +2,14 @@ from heapq import heappush, heappop
 import os
 
 
-def main_merge():
+
+def main_merge(index_path):
 
 	# max number of files open at a time
 	max_files = 1000
+	max_lines = 50000
+	last_file_name = ""
+
 	# number of files currently open
 	open_files = 0
 
@@ -14,21 +18,25 @@ def main_merge():
 
 	iteration_number = 1
 
-	while(len(os.listdir("files"))>1):
+	while(len(os.listdir(index_path))>1):
 		cur_number = 1
 		open_files = 0
-		num_files = len(os.listdir("files"))
+		num_files = len(os.listdir(index_path))
 		for file_number in range(1,num_files+1):
-			file_name = "files/"+str(iteration_number)+"_" + str(file_number) + ".txt"
+			file_name = index_path + "/" + str(iteration_number) + "_" + str(file_number) + ".txt"
 			
 			if open_files == max_files:
-				merge_lower(open_files,heap,iteration_number,cur_number)
+				last_file_name = merge_lower(open_files,heap,iteration_number,cur_number,index_path)
 
 				heap = []
 				open_files = 0
 				cur_number += 1
 
-			f = open(file_name,"r")
+			try:	
+				f = open(file_name,"r")
+			except:
+				pass
+
 			open_files+=1
 			line = f.readline()
 			if line.rstrip() == "":
@@ -39,20 +47,44 @@ def main_merge():
 			# first sort by word, then by docID
 			heappush(heap,(word,docID,line,f))
 	
-		merge_lower(open_files,heap,iteration_number,cur_number)
+		last_file_name = merge_lower(open_files,heap,iteration_number,cur_number,index_path)
 		heap = []
 		open_files = 0
 		cur_number += 1
 			
 		for file_number in range(1,num_files+1):
-			file_name = "files/"+str(iteration_number)+"_" + str(file_number) + ".txt"
+			file_name = index_path + "/" + str(iteration_number) + "_" + str(file_number) + ".txt"
 			os.remove(file_name)
 		iteration_number += 1
+		
+
+	'''
+	final_file_num = 1
+	cur_num_lines = 0
+		
+	main_file = open(last_file_name,"r")
+	line = main_file.readline()
+	file_name = index_path + "/" + str(final_file_num) + ".txt"
+	f = open(file_name,"w")
+	
+
+	while(line != ""):
+		if cur_num_lines == max_lines:
+			f.close()
+			final_file_num += 1
+			file_name = index_path + "/" + str(final_file_num) + ".txt"
+			f.open(file_name,"w")
+			cur_num_lines = 0
+			line = f.readline()
+	f.close()
+	'''
 
 
-def merge_lower(open_f,heap,iteration_number,cur_number):
-	file_name_new = "files/" + str(iteration_number+1) + "_" + str(cur_number) + ".txt"
+
+def merge_lower(open_f,heap,iteration_number,cur_number,index_path):
+	file_name_new = index_path + "/" + str(iteration_number+1) + "_" + str(cur_number) + ".txt"
 	f_new = open(file_name_new,"w")
+	last_file_name = file_name_new
 	last_line = ""
 	last_word = ""
 	last_rest = ""
@@ -93,5 +125,7 @@ def merge_lower(open_f,heap,iteration_number,cur_number):
 	f_new.close()
 	open_files = 0
 	heap = []
+
+	return file_name_new
 
 #main_merge()
