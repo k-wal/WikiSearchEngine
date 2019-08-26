@@ -23,6 +23,10 @@ class WikiHandler(xml.sax.ContentHandler):
 	# Call when element ends
 	def endElement(self,tag):
 		
+		if tag=="title" and self.count==int(num):
+			print(self.cur_content)
+			#exit()
+
 		if tag=="page" and self.count==int(num):
 			print(self.count)
 			print(self.cur_doc)

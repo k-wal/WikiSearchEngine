@@ -7,7 +7,7 @@ import sys
 
 dump_path = sys.argv[1]
 index_path = sys.argv[2]
-
+total_articles = 0
 
 class WikiHandler(xml.sax.ContentHandler):
 
@@ -22,13 +22,19 @@ class WikiHandler(xml.sax.ContentHandler):
 		self.category = ""
 		self.external_links = ""
 		self.references = ""
+		self.title_f = ""
+		self.is_title_open = False
+		self.title_file_number = ""
 
 	# Call when element starts
 	def startElement(self,tag,attributes):
+		global total_articles
+
 		self.cur_tag = tag
 		self.cur_content = ""
 		if tag=="page":
 			self.count += 1
+			total_articles += 1
 			self.cur_doc = ""
 			self.title = ""
 			self.body = ""
@@ -37,13 +43,13 @@ class WikiHandler(xml.sax.ContentHandler):
 			self.external_links = ""
 			self.references = ""
 
-
 	# Call when element ends
 	def endElement(self,tag):
 		
 		# save title
 		if tag == "title":
 			self.title = self.cur_content
+			self.write_title()
 
 		# save text
 		if tag=="text":
@@ -63,7 +69,20 @@ class WikiHandler(xml.sax.ContentHandler):
 		self.cur_content += content + " "
 		self.cur_doc += content + " "
 
-	
+	def write_title(self):
+		to_write = str(self.count) + ":" + self.title + "\n"
+		
+		if not self.is_title_open:
+			file_name = index_path + "/title" + str(int(self.count/1000)) + ".txt"
+			self.title_f = open(file_name,"a")
+		else:
+			if self.title_file_number != int(self.count/1000):
+				self.title_f.close()
+				file_name = index_path + "/title" + str(int(self.count/1000)) + ".txt"
+				self.title_f = open(file_name,"a")
+
+		self.title_f.write(to_write)
+
 
 
 #regex for category:
@@ -80,4 +99,4 @@ parser.setContentHandler(Handler)
 
 parser.parse(dump_path)
 
-merge.main_merge(index_path)
+merge.main_merge(total_articles,index_path)

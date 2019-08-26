@@ -11,6 +11,7 @@ stopwords = set(stopwords.words('english'))
 # create an array of separate words for all fields
 def tokenize(docID,article,index_path):
 	words = []
+	title = article[0]
 	for field in article:
 		#print(field)
 		words.append(re.findall("[\w]+",field))
@@ -29,26 +30,27 @@ def tokenize(docID,article,index_path):
 		for w in sep_words:
 			words[2].append(w)		
 
-	case_folding(docID,words,index_path)
+	case_folding(docID,words,title,index_path)
 	
-def case_folding(docID,old_words,index_path):
+def case_folding(docID,old_words,title,index_path):
 	new_words = []
 	for field in old_words:
 		new_words.append([s.lower() for s in field])
-	stem(docID,new_words,index_path)
+	stem(docID,new_words,title,index_path)
 
 # to remove stop words and stem words
-def stem(docID,all_words,index_path):
+def stem(docID,all_words,title,index_path):
 	words = []
 	for field in all_words:
 		words.append([porter.stem(w) for w in field if not w in stopwords])
-	count(docID,words,index_path)
+	new_words = [w for w in words if len(w)>1]
+	count(docID,new_words,title,index_path)
 
 # counting every single word count in all fields
-def count(docID,words,index_path):
+def count(docID,words,title,index_path):
 	count = {}
 	
-	# order of fields : title, body, info_box, category, external_links, referances
+	# order of fields : all(total frequency),title, body, info_box, category, external_links, referances
 	for (i,field) in enumerate(words):
 		for w in field:
 			if w not in count.keys():
@@ -58,10 +60,11 @@ def count(docID,words,index_path):
 				count[w][i] += 1
 	
 	to_file(docID,count,index_path)
+#	write_title(docID,title)
 
 
 # write to file "docID.txt"
-# format for a word (say key): key:docID,tTNUM,bBODY,iINFO,cCATEGORY,lLINKS,rREFERENCES
+# format for a word (say key): key:docID,TOTAL,tTNUM,bBODY,iINFO,cCATEGORY,lLINKS,rREFERENCES
 def to_file(docID,count,index_path):
 	file_name = index_path + "/1_" + str(docID) + ".txt"
 	f = open(file_name,"w")
@@ -70,6 +73,9 @@ def to_file(docID,count,index_path):
 
 		title,body,info_box,category,external_links,referances = count[w]
 		body -= (info_box + category)
+		total = title + body
+
+		to_write += "," + str(total)
 
 		if title>0:
 			to_write += "," + "t" + str(title)
@@ -92,7 +98,6 @@ def to_file(docID,count,index_path):
 		to_write += "\n"
 		f.write(to_write)
 	f.close()
-
 
 
 

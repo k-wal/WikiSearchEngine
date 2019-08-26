@@ -3,7 +3,7 @@ import os
 
 
 
-def main_merge(index_path):
+def main_merge(total_articles,index_path):
 
 	# max number of files open at a time
 	max_files = 1000
@@ -18,13 +18,19 @@ def main_merge(index_path):
 
 	iteration_number = 1
 
-	while(len(os.listdir(index_path))>1):
+	# total number of index files in the folder
+	num_files = total_articles
+
+	while(num_files>1):
+		# current number of files to create in this iteration
 		cur_number = 1
 		open_files = 0
-		num_files = len(os.listdir(index_path))
+		
+		# going through all files 
 		for file_number in range(1,num_files+1):
 			file_name = index_path + "/" + str(iteration_number) + "_" + str(file_number) + ".txt"
 			
+			# if max_files are open, then merge, empty heap, reset open_files 
 			if open_files == max_files:
 				last_file_name = merge_lower(open_files,heap,iteration_number,cur_number,index_path)
 
@@ -35,49 +41,64 @@ def main_merge(index_path):
 			try:	
 				f = open(file_name,"r")
 			except:
-				pass
+				print("FILE NOT OPENED")
+				print(file_name)
+				continue
 
-			open_files+=1
 			line = f.readline()
 			if line.rstrip() == "":
-				continue
+				line =  f.readline()
+				if line.rstrip() =="":
+					continue
 			
+			open_files+=1
+		
+			# splitting to get word and rest
 			word,rest = line.split(":")
+			# getting docID from the rest (before forst comma)
 			docID = int(rest.split(",")[0])
 			# first sort by word, then by docID
 			heappush(heap,(word,docID,line,f))
 	
+		# merge last of files, when the number is not bigger than max_files
 		last_file_name = merge_lower(open_files,heap,iteration_number,cur_number,index_path)
 		heap = []
 		open_files = 0
-		cur_number += 1
 			
+		# remove files of last iteration
 		for file_number in range(1,num_files+1):
 			file_name = index_path + "/" + str(iteration_number) + "_" + str(file_number) + ".txt"
 			os.remove(file_name)
 		iteration_number += 1
-		
+		# new number of files to merge = number of files created in this iteration
+		num_files = cur_number
 
-	'''
-	final_file_num = 1
-	cur_num_lines = 0
-		
-	main_file = open(last_file_name,"r")
-	line = main_file.readline()
-	file_name = index_path + "/" + str(final_file_num) + ".txt"
-	f = open(file_name,"w")
-	
 
-	while(line != ""):
-		if cur_num_lines == max_lines:
-			f.close()
-			final_file_num += 1
-			file_name = index_path + "/" + str(final_file_num) + ".txt"
-			f.open(file_name,"w")
-			cur_num_lines = 0
+	last_letters = "00"
+
+#	file_name = index_path + "/" + last_file_name
+	f = open(last_file_name,"r")
+	line = f.readline()
+	file_name = index_path + "/" + str(last_letters) + ".txt"
+	cur_f = open(file_name,"w")
+	while line!="":
+		word,rest = line.split(":")
+		#if len(word) < 2 or not((word[0]>='a' and word[0]<='z') or (word[0]>='0' and word[0]<='9')) or not((word[1]>='a' and word[1]<='z') or (word[1]>='0' and word[1]<='9')):
+		if len(word) < 2 or not(word[0]>='a' and word[0]<='z') or not(word[1]>='a' and word[1]<='z'):
 			line = f.readline()
+			continue
+		if last_letters!=word[:2]:
+			cur_f.close()
+			last_letters = word[:2]
+			file_name = index_path + "/" + str(last_letters) + ".txt"
+			cur_f = open(file_name,"w")
+		cur_f.write(line)
+		line = f.readline()
+	
 	f.close()
-	'''
+	cur_f.close()
+	os.remove(last_file_name)
+			
 
 
 
@@ -93,8 +114,11 @@ def merge_lower(open_f,heap,iteration_number,cur_number,index_path):
 	while open_f>0:
 		cur_entry+=1
 		
-		w, docID , line , f = heappop(heap)
-		
+		try:
+			w, docID , line , f = heappop(heap)
+		except:
+			print(heap)
+			
 		# extracting word and rest of sentence
 		word,rest = line.split(":")	
 		
