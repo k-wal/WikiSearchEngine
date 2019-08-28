@@ -1,4 +1,3 @@
-live tour
-gandhi
 national park
-shooting
+title:gandhi body:arjun infobox:gandhi category:gandhi ref:gandhi
+gandhi

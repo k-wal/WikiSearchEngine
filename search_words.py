@@ -51,6 +51,57 @@ def search_query(words,index_path,output_file):
 			break
 	output_file.write("\n")
 
+
+def field_search_query(field_word_dict,index_path,output_file):
+	all_docs = {}
+
+	# go through each field and update all_docs dictionary
+	for field,word in field_word_dict.items():
+		file_name = index_path + "/" + word[0] + word[1] + ".txt"
+		f = open(file_name,"r")
+		line = f.readline()
+
+		while line != "":
+			line_word,rest = re.split(':',line)
+			
+			if line_word == word:
+				docs_index = re.split('\|',rest)
+				docs = []
+				for d in docs_index:
+					docID,rest = re.split(',',d)
+					docID = int(docID)
+					
+					all_freq = [int(i) for i in re.split("[a-z]",rest)[1:] ]
+					all_fields = [i for i in re.split("[0-9]+",rest) if i]
+					
+					#freq = int(re.split("[a-z]",rest)[0])
+					# if this field does not have word for docID, move to next docID
+					if field not in all_fields:
+						continue
+
+					index = all_fields.index(field)
+					freq = all_freq[index]
+
+					if str(docID) not in all_docs.keys():
+						all_docs[str(docID)] = freq
+					else:
+						all_docs[str(docID)] *= freq
+					
+				break
+			line = f.readline()
+
+	count=0
+	for key,value in sorted(all_docs.items(), key = lambda item: item[1], reverse=True):
+		index = int(key)
+		print_title(index,index_path,output_file)
+		count+=1
+		if count==10:
+			break
+	output_file.write("\n")
+
+
+
+
 # writing title to output file
 def print_title(docID,index_path,output_file):
 	file_name = index_path + "/title" + str(int(docID/1000)) + ".txt"

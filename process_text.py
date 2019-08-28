@@ -14,6 +14,7 @@ def tokenize(docID,article,index_path):
 	title = article[0]
 	for field in article:
 		#print(field)
+	#	words.append(re.findall("[a-zA-Z]+",field))
 		words.append(re.findall("[a-zA-Z]+",field))
 	
 	# finding category from body
