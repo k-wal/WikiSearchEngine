@@ -66,6 +66,7 @@ class WikiHandler(xml.sax.ContentHandler):
 			#print(self.count)
 
 	def characters(self,content):
+		content = content.replace("_"," ")
 		self.cur_content += content + " "
 		self.cur_doc += content + " "
 

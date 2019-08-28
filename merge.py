@@ -1,6 +1,6 @@
 from heapq import heappush, heappop
 import os
-
+import re
 
 
 def main_merge(total_articles,index_path):
@@ -54,9 +54,9 @@ def main_merge(total_articles,index_path):
 			open_files+=1
 		
 			# splitting to get word and rest
-			word,rest = line.split(":")
+			word,rest = re.split(':',line)
 			# getting docID from the rest (before forst comma)
-			docID = int(rest.split(",")[0])
+			docID = int(re.split(',',rest)[0])
 			# first sort by word, then by docID
 			heappush(heap,(word,docID,line,f))
 	
@@ -82,9 +82,9 @@ def main_merge(total_articles,index_path):
 	file_name = index_path + "/" + str(last_letters) + ".txt"
 	cur_f = open(file_name,"w")
 	while line!="":
-		word,rest = line.split(":")
-		#if len(word) < 2 or not((word[0]>='a' and word[0]<='z') or (word[0]>='0' and word[0]<='9')) or not((word[1]>='a' and word[1]<='z') or (word[1]>='0' and word[1]<='9')):
-		if len(word) < 2 or not(word[0]>='a' and word[0]<='z') or not(word[1]>='a' and word[1]<='z'):
+		word,rest = re.split(":",line)
+		if len(word) < 2 or not((word[0]>='a' and word[0]<='z') or (word[0]>='0' and word[0]<='9')) or not((word[1]>='a' and word[1]<='z') or (word[1]>='0' and word[1]<='9')):
+		#if len(word) < 2 or not(word[0]>='a' and word[0]<='z') or not(word[1]>='a' and word[1]<='z'):
 			line = f.readline()
 			continue
 		if last_letters!=word[:2]:
@@ -120,7 +120,7 @@ def merge_lower(open_f,heap,iteration_number,cur_number,index_path):
 			print(heap)
 			
 		# extracting word and rest of sentence
-		word,rest = line.split(":")	
+		word,rest = re.split((':'),line)	
 		
 		#removing newline at the end
 		rest= rest.rstrip()
@@ -139,7 +139,7 @@ def merge_lower(open_f,heap,iteration_number,cur_number,index_path):
 		last_word,last_rest = word,rest
 		new_line = f.readline()
 		if new_line != "":
-			w = new_line.split(":")[0]
+			w = re.split(':',new_line)[0]
 			heappush(heap,(w,docID,new_line,f))
 		else:
 			f.close()

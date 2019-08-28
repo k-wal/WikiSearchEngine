@@ -14,35 +14,42 @@ def tokenize(docID,article,index_path):
 	title = article[0]
 	for field in article:
 		#print(field)
-		words.append(re.findall("[\w]+",field))
+		words.append(re.findall("[a-zA-Z]+",field))
 	
 	# finding category from body
 	category = re.findall("\[\[Category\:.*\]\]",article[1])
 	for c in category:
-		sep_words = re.findall("[\w]+",c)
+		sep_words = re.findall("[a-zA-Z]+",c)
 		for w in sep_words:
 			words[3].append(w)		
 
 	# finding info_box from body
 	info_box = re.findall("{{Infobox.*}}",article[1])
+	
 	for i in info_box:
-		sep_words = re.findall("[\w]+",i)
+		sep_words = re.findall("[a-zA-Z]+",i)
 		for w in sep_words:
 			words[2].append(w)		
 
-	case_folding(docID,words,title,index_path)
+	#case_folding(docID,words,title,index_path)
+	stem(docID,words,title,index_path)
 	
+
+'''
 def case_folding(docID,old_words,title,index_path):
 	new_words = []
 	for field in old_words:
 		new_words.append([s.lower() for s in field])
 	stem(docID,new_words,title,index_path)
+'''
 
-# to remove stop words and stem words
+# to remove stop words and stem words and case folding
 def stem(docID,all_words,title,index_path):
 	words = []
 	for field in all_words:
-		words.append([porter.stem(w) for w in field if not w in stopwords])
+		words.append([porter.stem(w.lower()) for w in field if not w.lower() in stopwords])
+
+
 	new_words = [w for w in words if len(w)>1]
 	count(docID,new_words,title,index_path)
 
@@ -60,8 +67,6 @@ def count(docID,words,title,index_path):
 				count[w][i] += 1
 	
 	to_file(docID,count,index_path)
-#	write_title(docID,title)
-
 
 # write to file "docID.txt"
 # format for a word (say key): key:docID,TOTAL,tTNUM,bBODY,iINFO,cCATEGORY,lLINKS,rREFERENCES
@@ -78,22 +83,22 @@ def to_file(docID,count,index_path):
 		to_write += "," + str(total)
 
 		if title>0:
-			to_write += "," + "t" + str(title)
+			to_write += "t" + str(title)
 
 		if body>0:
-			to_write += "," + "b" + str(body)
+			to_write += "b" + str(body)
 		
 		if info_box>0:
-			to_write += "," + "i" + str(info_box)
+			to_write += "i" + str(info_box)
 
 		if category>0:
-			to_write += "," + "c" + str(category)
+			to_write += "c" + str(category)
 
 		if external_links>0:
-			to_write += "," + "e" + str(links)
+			to_write += "e" + str(links)
 
-		if title>0:
-			to_write += "," + "r" + str(referances)
+		if referances>0:
+			to_write += "r" + str(referances)
 
 		to_write += "\n"
 		f.write(to_write)

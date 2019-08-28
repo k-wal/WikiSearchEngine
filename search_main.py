@@ -3,14 +3,18 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.stem import SnowballStemmer
 import re
-from search_words import search_word
+from search_words import search_query
 
 snowball = SnowballStemmer('english')
 stopwords = set(stopwords.words('english'))
 
 
-query_path = sys.argv[1]
-index_path = sys.argv[2]
+index_path = sys.argv[1]
+query_path = sys.argv[2]
+output_path = sys.argv[3]
+
+output_file = open(output_path,"w")
+
 f = open(query_path,"r")
 
 query = f.readline()
@@ -33,7 +37,7 @@ while(query!=""):
 
 	words = stemmed
 
-	search_word(words,index_path)
+	search_query(words,index_path,output_file)
 
 	query = f.readline()
 
