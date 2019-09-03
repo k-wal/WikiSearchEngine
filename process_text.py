@@ -16,7 +16,9 @@ def tokenize(docID,article,index_path):
 		#print(field)
 	#	words.append(re.findall("[a-zA-Z]+",field))
 		words.append(re.findall("[a-zA-Z]+",field))
-	
+
+
+
 	# finding category from body
 	category = re.findall("\[\[Category\:.*\]\]",article[1])
 	for c in category:
@@ -79,26 +81,35 @@ def to_file(docID,count,index_path):
 
 		title,body,info_box,category,external_links,referances = count[w]
 		body -= (info_box + category)
-		total = title + body
-
-		to_write += "," + str(total)
-
-		if title>0:
+		
+		if title==1:
+			to_write += "T"
+		elif title>0:
 			to_write += "t" + str(title)
 
-		if body>0:
+		if body==1:
+			to_write += "B"
+		elif body>0:
 			to_write += "b" + str(body)
 		
-		if info_box>0:
+		if info_box==1:
+			to_write += "I"
+		elif info_box>0:
 			to_write += "i" + str(info_box)
 
-		if category>0:
+		if category==1:
+			to_write += "C"
+		elif category>0:
 			to_write += "c" + str(category)
 
-		if external_links>0:
+		if external_links==1:
+			to_write += "E"
+		elif external_links>0:
 			to_write += "e" + str(links)
 
-		if referances>0:
+		if referances==1:
+			to_write += "R"
+		elif referances>0:
 			to_write += "r" + str(referances)
 
 		to_write += "\n"

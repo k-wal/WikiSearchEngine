@@ -1,0 +1,4 @@
+- byte compression : if title occurs only once, use 'T' instead of t1
+	while reading, do re.sub('T','t1',string_name) AND re.sub('B','b1',string_name)
+
+- remove frequency column, compute it on the fly from field frequencies
