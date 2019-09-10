@@ -4,7 +4,7 @@ import re
 def search_query(words,index_path,output_file):
 	all_docs = {}
 	for word in words:
-		file_name = index_path + "/" + word[0] + word[1] + ".txt"
+		file_name = index_path + "/" + word[0] + word[1] + word[2] + ".txt"
 		f = open(file_name,"r")
 		line = f.readline()
 
@@ -27,8 +27,10 @@ def search_query(words,index_path,output_file):
 			docs_index = re.split('\|',rest)
 			docs = []
 			for d in docs_index:
-				docID = re.split("[a-z]",d)[0]
+				docID,rest = re.split(',',d)
+				docID = int(docID)
 				
+				'''
 				all_freq = [int(i) for i in re.split("[a-z]",d)[1:]]
 				all_fields = [i for i in re.split("[0-9]+",d) if i]
 				
@@ -38,8 +40,8 @@ def search_query(words,index_path,output_file):
 						freq += all_freq[i]
 					if field == 'b':
 						freq += all_freq[i]
-
-				#freq = int(re.split("[a-z]",rest)[0])
+				'''
+				freq = int(re.split("[a-z]",rest)[0])
 				if str(docID) not in all_docs.keys():
 					all_docs[str(docID)] = freq
 				else:

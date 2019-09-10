@@ -56,7 +56,7 @@ def main_merge(total_articles,index_path):
 			# splitting to get word and rest
 			word,rest = re.split(':',line)
 			# getting docID from the rest (before forst comma)
-			docID = int(re.split('[a-zA-Z]',rest)[0])
+			docID = int(re.split(',',rest)[0]) 
 			# first sort by word, then by docID
 			heappush(heap,(word,docID,line,f))
 	
@@ -74,7 +74,7 @@ def main_merge(total_articles,index_path):
 		num_files = cur_number
 
 
-	last_letters = "00"
+	last_letters = "000"
 
 #	file_name = index_path + "/" + last_file_name
 	f = open(last_file_name,"r")
@@ -83,13 +83,13 @@ def main_merge(total_articles,index_path):
 	cur_f = open(file_name,"w")
 	while line!="":
 		word,rest = re.split(":",line)
-		if len(word) < 2:
+		if len(word) < 3:
 		#if len(word) < 2 or not(word[0]>='a' and word[0]<='z') or not(word[1]>='a' and word[1]<='z'):
 			line = f.readline()
 			continue
-		if last_letters!=word[:2]:
+		if last_letters!=word[:3]:
 			cur_f.close()
-			last_letters = word[:2]
+			last_letters = word[:3]
 			file_name = index_path + "/" + str(last_letters) + ".txt"
 			cur_f = open(file_name,"w")
 		cur_f.write(line)

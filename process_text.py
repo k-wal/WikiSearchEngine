@@ -22,7 +22,7 @@ def tokenize(docID,article,index_path):
 	# finding category from body
 	category = re.findall("\[\[Category\:.*\]\]",article[1])
 	for c in category:
-		sep_words = re.findall("[a-zA-Z]+",c)
+		sep_words = re.findall("[a-zA-Z0-9]+",c)
 		for w in sep_words:
 			words[3].append(w)		
 
@@ -81,7 +81,10 @@ def to_file(docID,count,index_path):
 
 		title,body,info_box,category,external_links,referances = count[w]
 		body -= (info_box + category)
-		
+		total = title + body
+
+		to_write += "," + str(total)
+
 		if title==1:
 			to_write += "T"
 		elif title>0:
