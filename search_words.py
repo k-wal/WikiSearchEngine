@@ -1,9 +1,19 @@
 import re
+import numpy
+import math
+import copy
 
 # searching for one query
 def search_query(words,index_path,output_file):
 	all_docs = {}
-	for word in words:
+	words_copy = copy.deepcopy(words)
+	words = []
+	for word in words_copy:
+		if len(word) >= 3:
+			words.append(word)
+
+	query_vector = [0] * len(words)
+	for i_word,word in enumerate(words):
 		file_name = index_path + "/" + word[0] + word[1] + word[2] + ".txt"
 		f = open(file_name,"r")
 		line = f.readline()
@@ -25,6 +35,10 @@ def search_query(words,index_path,output_file):
 			rest = re.sub('C','c1',rest)
 
 			docs_index = re.split('\|',rest)
+			total_docs = len(docs_index)
+			idf = math.log((30000/total_docs),5)
+			query_vector[i_word] = 1 * idf
+
 			docs = []
 			for d in docs_index:
 				docID,rest = re.split(',',d)
@@ -41,17 +55,25 @@ def search_query(words,index_path,output_file):
 					if field == 'b':
 						freq += all_freq[i]
 				'''
-				freq = int(re.split("[a-z]",rest)[0])
+				# tf : TERM FREQUENCY
+				tf = int(re.split("[a-z]",rest)[0])
+				if tf==0:
+					continue
 				if str(docID) not in all_docs.keys():
-					all_docs[str(docID)] = freq
-				else:
-					all_docs[str(docID)] *= freq
+					all_docs[str(docID)] = [0] * len(words)
+				
+				all_docs[str(docID)][i_word] = tf * idf
 					
 			break
 			line = f.readline()
 
+	# calculating similarity
+	similarity = {}
+	for docID,vector in all_docs.items():
+		similarity[docID] = calculate_similarity(vector,query_vector)
+
 	count=0
-	for key,value in sorted(all_docs.items(), key = lambda item: item[1], reverse=True):
+	for key,value in sorted(similarity.items(), key = lambda item: item[1], reverse=True):
 		index = int(key)
 		print_title(index,index_path,output_file)
 		count+=1
@@ -135,3 +157,15 @@ def print_title(docID,index_path,output_file):
 
 
 # "==References==\n[{{.*}}\n]+\n"
+
+
+def calculate_similarity(a,b):
+	if len(a) == 1:
+		return a[0]*b[0]
+	len1 = math.sqrt(numpy.dot(a,a))
+	len2 = math.sqrt(numpy.dot(b,b))
+	dot = numpy.dot(a,b)
+	#print(len1,len2,dot)
+	if len1 == 0 or len2 == 0:
+		print(len1,len2)
+	return (dot/(len1*len2))

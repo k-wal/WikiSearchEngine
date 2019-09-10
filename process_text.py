@@ -81,7 +81,7 @@ def to_file(docID,count,index_path):
 
 		title,body,info_box,category,external_links,referances = count[w]
 		body -= (info_box + category)
-		total = title + body
+		total = title + body + info_box + category + external_links + referances
 
 		to_write += "," + str(total)
 
