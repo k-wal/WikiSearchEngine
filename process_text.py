@@ -18,7 +18,7 @@ def tokenize(docID,article,index_path):
 		words.append(re.findall("[a-zA-Z]+",field))
 
 
-
+	'''
 	# finding category from body
 	category = re.findall("\[\[Category\:.*\]\]",article[1])
 	for c in category:
@@ -33,9 +33,9 @@ def tokenize(docID,article,index_path):
 		sep_words = re.findall("[a-zA-Z]+",i)
 		for w in sep_words:
 			words[2].append(w)		
-
+	'''
 	#case_folding(docID,words,title,index_path)
-	stem(docID,words,title,index_path)
+	return stem(docID,words,title,index_path)
 	
 
 '''
@@ -52,9 +52,9 @@ def stem(docID,all_words,title,index_path):
 	for field in all_words:
 		words.append([porter.stem(w.lower()) for w in field if not w.lower() in stopwords])
 
-
+	del all_words
 	new_words = [w for w in words if len(w)>1]
-	count(docID,new_words,title,index_path)
+	return count(docID,new_words,title,index_path)
 
 # counting every single word count in all fields
 def count(docID,words,title,index_path):
@@ -68,20 +68,22 @@ def count(docID,words,title,index_path):
 				count[w][i] = 1
 			else:
 				count[w][i] += 1
+	del words
 	
-	to_file(docID,count,index_path)
+	return to_file(docID,count,index_path)
 
 # write to file "docID.txt"
 # format for a word (say key): key:docID,TOTAL,tTNUM,bBODY,iINFO,cCATEGORY,lLINKS,rREFERENCES
 def to_file(docID,count,index_path):
 	file_name = index_path + "/1_" + str(docID) + ".txt"
-	f = open(file_name,"w")
+	f = open(file_name,"w+")
 	for w in sorted(count.keys()):
 		to_write = w + ":" + str(docID)
 
 		title,body,info_box,category,external_links,referances = count[w]
-		body -= (info_box + category)
-		total = title + body + info_box + category + external_links + referances
+		#body -= (info_box + category)
+		#total = title + body + info_box + category + external_links + referances
+		total = title + body
 
 		to_write += "," + str(total)
 
@@ -94,7 +96,7 @@ def to_file(docID,count,index_path):
 			to_write += "B"
 		elif body>0:
 			to_write += "b" + str(body)
-		
+		'''
 		if info_box==1:
 			to_write += "I"
 		elif info_box>0:
@@ -114,11 +116,12 @@ def to_file(docID,count,index_path):
 			to_write += "R"
 		elif referances>0:
 			to_write += "r" + str(referances)
-
+		'''
 		to_write += "\n"
 		f.write(to_write)
-	f.close()
-
+	del count
+	f.seek(0,0)
+	return f
 
 
 #	[ print(key , " :: " , value) for (key, value) in sorted(count.items())] #if count[key][3]>0 ]

@@ -1,5 +1,4 @@
 import re
-from threading import Thread
 import xml.sax
 import process_text as pt
 import merge
@@ -8,6 +7,11 @@ import sys
 dump_path = sys.argv[1]
 index_path = sys.argv[2]
 total_articles = 0
+merge_block_size = 1000
+last_merge_end = 0
+last_merge_number = 0
+file_pointers = {}
+
 
 class WikiHandler(xml.sax.ContentHandler):
 
@@ -45,7 +49,12 @@ class WikiHandler(xml.sax.ContentHandler):
 
 	# Call when element ends
 	def endElement(self,tag):
-		
+		global file_pointers
+		global total_articles
+		global merge_block_size
+		global last_merge_end
+		global index_path
+		global last_merge_number
 		# save title
 		if tag == "title":
 			self.title = self.cur_content
@@ -60,10 +69,17 @@ class WikiHandler(xml.sax.ContentHandler):
 			#self.category = re.findall("^\[\[Category\:.*\]\]$",self.body)
 			#self.info_box = re.findall("^{{Infobox.*}}$",self.body)
 			arg = [self.title,self.body,self.info_box,self.category,self.external_links,self.references] 
-			pt.tokenize(self.count,arg,index_path)
+			file_pointers[str(self.count)] = pt.tokenize(self.count,arg,index_path)
 			#print(q.get())
 			#pt.tokenize(self.cur_doc)
 			#print(self.count)
+		if tag=="page" and total_articles % merge_block_size == 0 and total_articles != 0:
+			merge.range_merge(last_merge_end + 1,total_articles,last_merge_number+1,file_pointers,index_path)
+			last_merge_number += 1
+			file_pointers = {}
+			last_merge_end = total_articles
+
+
 
 	def characters(self,content):
 		content = content.replace("_"," ")
@@ -100,4 +116,6 @@ parser.setContentHandler(Handler)
 
 parser.parse(dump_path)
 
-merge.main_merge(total_articles,index_path)
+merge.range_merge(last_merge_end + 1,total_articles,last_merge_number+1,file_pointers,index_path)
+del file_pointers
+merge.main_merge(last_merge_number+1,index_path)

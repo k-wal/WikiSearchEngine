@@ -40,7 +40,7 @@ while(query!=""):
 		continue
 
 	# finding words in the query
-	words=re.findall("[\w]+",query)
+	words=re.findall("[a-zA-Z]+",query)
 
 	# case folding
 	for word in words:

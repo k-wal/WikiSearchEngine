@@ -3,6 +3,55 @@ import os
 import re
 
 
+def range_merge(start_docID,end_docID,merge_number,file_pointers,index_path):
+	# number of files currently open
+	open_files = 0
+
+	# total number of files
+	heap = []
+
+	iteration_number = 1
+
+	# going through all files 
+	for file_number in range(start_docID,end_docID+1):
+		
+		try:	
+			f = file_pointers[str(file_number)]
+		except:
+			print("FILE NOT OPENED")
+			print(file_name)
+			continue
+
+		line = f.readline()
+		if line.rstrip() == "":
+			line =  f.readline()
+			if line.rstrip() =="":
+				continue
+		
+		open_files+=1
+	
+		# splitting to get word and rest
+		word,rest = re.split(':',line)
+		# getting docID from the rest (before forst comma)
+		docID = int(re.split(',',rest)[0]) 
+		# first sort by word, then by docID
+		heappush(heap,(word,docID,line,f))
+
+	# merge last of files, when the number is not bigger than max_files
+	last_file_name = merge_lower(open_files,heap,iteration_number,merge_number,index_path)
+	heap = []
+	open_files = 0
+	
+	del heap
+	del file_pointers
+
+	# remove files of last iteration
+	for file_number in range(start_docID,end_docID+1):
+		file_name = index_path + "/" + str(iteration_number) + "_" + str(file_number) + ".txt"
+		os.remove(file_name)
+
+
+
 def main_merge(total_articles,index_path):
 
 	# max number of files open at a time
@@ -16,7 +65,7 @@ def main_merge(total_articles,index_path):
 	# total number of files
 	heap = []
 
-	iteration_number = 1
+	iteration_number = 2
 
 	# total number of index files in the folder
 	num_files = total_articles
@@ -73,6 +122,8 @@ def main_merge(total_articles,index_path):
 		# new number of files to merge = number of files created in this iteration
 		num_files = cur_number
 
+	del heap
+	
 
 	last_letters = "000"
 
