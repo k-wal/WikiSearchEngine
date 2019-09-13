@@ -91,12 +91,12 @@ class WikiHandler(xml.sax.ContentHandler):
 		
 		if not self.is_title_open:
 			file_name = index_path + "/title" + str(int(self.count/1000)) + ".txt"
-			self.title_f = open(file_name,"a")
+			self.title_f = open(file_name,"a",encoding="utf-8")
 		else:
 			if self.title_file_number != int(self.count/1000):
 				self.title_f.close()
 				file_name = index_path + "/title" + str(int(self.count/1000)) + ".txt"
-				self.title_f = open(file_name,"a")
+				self.title_f = open(file_name,"a",encoding="utf-8")
 
 		self.title_f.write(to_write)
 

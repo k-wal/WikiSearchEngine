@@ -4,39 +4,36 @@ from nltk.stem import PorterStemmer
 from nltk.stem import SnowballStemmer
 import re
 from search_words import search_query, field_search_query
+import time
 
 snowball = SnowballStemmer('english')
 stopwords = set(stopwords.words('english'))
 
 
 index_path = sys.argv[1]
-query_path = sys.argv[2]
-output_path = sys.argv[3]
+start_time = time.time()
 
 
-def field_query(query,index_path,output_file):
+def field_query(query,index_path):
 	field_words = [i for i in re.split(' ',query) if i]
 	field_word_dict = {}
 	for fw in field_words:
 		field,word = re.split(':',fw)
 		field_word_dict[field[0]] = word
 
-	field_search_query(field_word_dict,index_path,output_file)
+	result_count = field_search_query(field_word_dict,index_path)
 
 
-output_file = open(output_path,"w")
-
-f = open(query_path,"r")
-
-query = f.readline()
 
 
-while(query!=""):
+while True:
 	words = []
+	query = input("QUERY : ")
+	start_time = time.time()
+	print("\n")
 
 	if len(re.split(':',query)) > 1:
-		field_query(query,index_path,output_file)
-		query = f.readline()
+		result_query = field_query(query,index_path)
 		continue
 
 	# finding words in the query
@@ -54,10 +51,8 @@ while(query!=""):
 
 	words = stemmed
 
-	search_query(words,index_path,output_file)
-
-	query = f.readline()
-
-f.close()
+	result_count = search_query(words,index_path)
+	print("---------------------", result_count, " results in ",time.time() - start_time," seconds ---------------")
+	print("\n\n")
 
 

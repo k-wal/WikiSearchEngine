@@ -1,4 +1,4 @@
-python3 search_main.py $1 $2 $3
+python3 search_main.py $1
 
 # 1: index_path
 # 2: query file

@@ -89,7 +89,8 @@ def main_merge(total_articles,index_path):
 
 			try:	
 				f = open(file_name,"r")
-			except:
+			except Exception as e:
+				print(e)
 				print("FILE NOT OPENED")
 				print(file_name)
 				continue

@@ -1,11 +1,15 @@
 import re
 from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
 from nltk.stem import SnowballStemmer
 
 
 porter = SnowballStemmer('english')
 stopwords = set(stopwords.words('english'))
+
+cache_capacity = 50000
+stemmer_cache_filled = 0
+stemmer_cache_word_count = {}
+stemmer_cache = {}
 
 
 # create an array of separate words for all fields
@@ -46,11 +50,39 @@ def case_folding(docID,old_words,title,index_path):
 	stem(docID,new_words,title,index_path)
 '''
 
+def memoize_stem(word):
+	global stemmer_cache_filled
+	global stemmer_cache_word_count
+	global stemmer_cache
+
+	if word in stemmer_cache.keys():
+		stemmer_cache_word_count[word] += 1
+		return stemmer_cache[word]
+	else:
+		if stemmer_cache_filled == cache_capacity:
+			to_delete = sorted(stemmer_cache_word_count.items(),key = lambda k:k[1])
+			to_delete = to_delete[0:1000]
+			for key,value in to_delete:
+				stemmer_cache_filled -= 1
+				del stemmer_cache_word_count[key]
+				del stemmer_cache[key]
+
+		stemmer_cache[word] = porter.stem(word)
+		stemmer_cache_word_count[word] = 1
+		stemmer_cache_filled += 1
+		
+
+		return stemmer_cache[word]
+
+
+
+
+
 # to remove stop words and stem words and case folding
 def stem(docID,all_words,title,index_path):
 	words = []
 	for field in all_words:
-		words.append([porter.stem(w.lower()) for w in field if not w.lower() in stopwords])
+		words.append([memoize_stem(w.lower()) for w in field if not w.lower() in stopwords])
 
 	del all_words
 	new_words = [w for w in words if len(w)>1]

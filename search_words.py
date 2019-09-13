@@ -4,7 +4,7 @@ import math
 import copy
 
 # searching for one query
-def search_query(words,index_path,output_file):
+def search_query(words,index_path):
 	all_docs = {}
 	words_copy = copy.deepcopy(words)
 	words = []
@@ -15,7 +15,11 @@ def search_query(words,index_path,output_file):
 	query_vector = [0] * len(words)
 	for i_word,word in enumerate(words):
 		file_name = index_path + "/" + word[0] + word[1] + word[2] + ".txt"
-		f = open(file_name,"r")
+		try :
+			f = open(file_name,"r")
+		except:
+			continue
+		
 		line = f.readline()
 
 		while line != "":
@@ -36,8 +40,10 @@ def search_query(words,index_path,output_file):
 
 			docs_index = re.split('\|',rest)
 			total_docs = len(docs_index)
-			idf = math.log((30000/total_docs),5)
+			idf = math.log((19000000/total_docs),10)
 			query_vector[i_word] = 1 * idf
+			if len(docs_index) > 15000:
+				docs_index = docs_index[0:15000]
 
 			docs = []
 			for d in docs_index:
@@ -73,22 +79,30 @@ def search_query(words,index_path,output_file):
 		similarity[docID] = calculate_similarity(vector,query_vector)
 
 	count=0
+	if len(all_docs) > 10:
+		result_count = 10
+	else:
+		result_count = len(all_docs)
+
+
+	count=0
 	for key,value in sorted(similarity.items(), key = lambda item: item[1], reverse=True):
 		index = int(key)
-		print_title(index,index_path,output_file)
+		print_title(index,index_path,count+1)
 		count+=1
 		if count==10:
 			break
-	output_file.write("\n")
+
+	return result_count
 
 
 # searching for field query
-def field_search_query(field_word_dict,index_path,output_file):
+def field_search_query(field_word_dict,index_path):
 	all_docs = {}
 
 	# go through each field and update all_docs dictionary
 	for field,word in field_word_dict.items():
-		file_name = index_path + "/" + word[0] + word[1] + ".txt"
+		file_name = index_path + "/" + word[0] + word[1] +word[2] + ".txt"
 		f = open(file_name,"r")
 		line = f.readline()
 
@@ -127,19 +141,23 @@ def field_search_query(field_word_dict,index_path,output_file):
 			line = f.readline()
 
 	count=0
+	if len(all_docs) > 10:
+		result_count = 10
+	else:
+		result_count = len(all_docs)
+
 	for key,value in sorted(all_docs.items(), key = lambda item: item[1], reverse=True):
 		index = int(key)
-		print_title(index,index_path,output_file)
+		print_title(index,index_path,count+1)
 		count+=1
 		if count==10:
 			break
-	output_file.write("\n")
-
+	return result_count
 
 
 
 # writing title to output file
-def print_title(docID,index_path,output_file):
+def print_title(docID,index_path,result_index):
 	file_name = index_path + "/title" + str(int(docID/1000)) + ".txt"
 	f = open(file_name,"r")
 	line = f.readline()
@@ -150,7 +168,7 @@ def print_title(docID,index_path,output_file):
 		l_line = len(line)
 		title = line[l_id:l_line]
 		if int(fID) == docID:
-			output_file.write(title)
+			print(str(result_index)+" ",title.rstrip())
 			break
 		line = f.readline()
 
@@ -168,4 +186,10 @@ def calculate_similarity(a,b):
 	#print(len1,len2,dot)
 	if len1 == 0 or len2 == 0:
 		print(len1,len2)
-	return (dot/(len1*len2))
+	#retun (dot/(len1*len2))
+	count=0
+	for i in a:
+		if i != 0:
+			count+=1
+
+	return (count*dot)/math.sqrt(len1)
